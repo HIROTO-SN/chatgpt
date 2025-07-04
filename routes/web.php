@@ -16,7 +16,7 @@ Route::middleware([
         $chat = auth()->user()->conversations()->create([]);
         return redirect()->route('chat.show', $chat);
     })->name('chat');
-    Route::get('chat/{conversation::uuid}', Chat::class)->name('chat.show');
+    Route::get('chat/{conversation:uuid}', Chat::class)->name('chat.show');
     Route::get('/dashboard', function () {
         return view('dashboard');
     })->name('dashboard');
