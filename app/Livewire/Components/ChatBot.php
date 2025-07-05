@@ -67,8 +67,6 @@ class ChatBot extends Component {
 
         $this->answer = $entireMessage;
 
-        dd($entireMessage);
-
         //Store Conversation into the database from AI
         $this->conversation->messages()->create([
             'content' => $entireMessage,
@@ -78,6 +76,33 @@ class ChatBot extends Component {
         //dispatch event to update the conversation
         $this->dispatch('messageAdded');
 
+    }
+
+    private function generateTitle(array $messages): string
+    {
+        $prompt = [
+            'role' => 'system',
+            'content' => 'Create a title based on previous messages, without anything but the title. Title should be without quotation marks and not be prefixed with anything like "Title:"'
+        ];
+
+        $messagesWithInstruction = array_merge($messages, [$prompt]);
+        $response = FacadesOpenAI::chat()->create([
+           'model' => 'gpt-3.5-turbo',
+           'messages' => $messagesWithInstruction,
+        ]);
+        if (!empty($response->choices)) {
+            $choices = $response->choices;
+            $titleResponse = end($choices);
+            return $titleResponse->message->content ?? 'New Chat';
+        }
+
+        return 'New Chat';
+    }
+
+    public function clearState(): void
+    {
+        $this->responding = false;
+        $this->answer = null;
     }
 
     public function render() {
